@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/pandukamuditha/learn-golang/handlers"
 )
 
@@ -17,13 +18,18 @@ func main() {
 	postsHandler := handlers.NewPostsHandler(logger)
 	commentsHandler := handlers.NewCommentsHandler(logger)
 
-	serveMux := http.NewServeMux()
-	serveMux.Handle("/posts", postsHandler)
-	serveMux.Handle("/comments", commentsHandler)
+	router := mux.NewRouter()
+	router.Handle("/posts", postsHandler)
+	router.Handle("/comments", commentsHandler)
+
+	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("{\"status\": \"ok\"}"))
+	})
 
 	httpServer := http.Server{
 		Addr:         ":8080",
-		Handler:      serveMux,
+		Handler:      router,
 		ErrorLog:     logger,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
