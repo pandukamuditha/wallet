@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	logger := log.New(os.Stdout, "posts-api", log.LstdFlags)
+	logger := log.New(os.Stdout, "blog-api ", log.LstdFlags)
 
 	postsHandler := handlers.NewPostsHandler(logger)
 	commentsHandler := handlers.NewCommentsHandler(logger)
@@ -40,16 +40,19 @@ func main() {
 		}
 	}()
 
-	// trap sigterm or interupt and gracefully shutdown the server
+	// Trap interupt and gracefully shutdown the server
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
-	signal.Notify(c, os.Kill)
 
 	// Block until a signal is received.
 	sig := <-c
 	log.Println("Got signal:", sig)
 
-	// gracefully shutdown the server, waiting max 30 seconds for current operations to complete
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	// Wait 30 seconds and shutdown hhtp server
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	httpServer.Shutdown(ctx)
+
+	logger.Print("Shutting down server")
+	os.Exit(0)
 }
