@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,11 +10,21 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/pandukamuditha/learn-golang/handlers"
+	"github.com/joho/godotenv"
+	"github.com/pandukamuditha/learn-golang/cmd/handlers"
 )
 
 func main() {
 	logger := log.New(os.Stdout, "blog-api ", log.LstdFlags)
+
+	err := godotenv.Load()
+	if err != nil {
+		logger.Fatal("Error loading .env file")
+	} else {
+		logger.Print("Successfully loaded .env file")
+	}
+
+	appServerPort := os.Getenv("APP_SERVER_PORT")
 
 	postsHandler := handlers.NewPostsHandler(logger)
 	commentsHandler := handlers.NewCommentsHandler(logger)
@@ -28,7 +39,7 @@ func main() {
 	})
 
 	httpServer := http.Server{
-		Addr:         ":8080",
+		Addr:         fmt.Sprintf(":%s", appServerPort),
 		Handler:      router,
 		ErrorLog:     logger,
 		ReadTimeout:  5 * time.Second,
@@ -37,7 +48,7 @@ func main() {
 	}
 
 	go func() {
-		logger.Println("Starting server on 8080")
+		logger.Printf("Starting server on %s", appServerPort)
 
 		err := httpServer.ListenAndServe()
 
@@ -54,7 +65,7 @@ func main() {
 	sig := <-c
 	log.Println("Got signal:", sig)
 
-	// Wait 30 seconds and shutdown hhtp server
+	// Wait 30 seconds and shutdown http server
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	httpServer.Shutdown(ctx)
