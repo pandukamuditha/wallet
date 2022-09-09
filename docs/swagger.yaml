@@ -1,0 +1,41 @@
+definitions:
+  models.User:
+    properties:
+      firstName:
+        type: string
+      id:
+        type: integer
+      lastName:
+        type: string
+    type: object
+host: localhost:8008
+info:
+  contact: {}
+  description: This is a basic wallet application
+  title: Basic Wallet
+  version: "1.0"
+paths:
+  /user/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: Get user by user ID
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "500":
+          description: Internal Server Error
+      summary: Get a user
+      tags:
+      - user
+swagger: "2.0"
