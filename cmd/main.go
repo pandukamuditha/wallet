@@ -11,9 +11,14 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
-	"github.com/pandukamuditha/simple-blog/cmd/common"
-	"github.com/pandukamuditha/simple-blog/cmd/handlers"
+	"github.com/pandukamuditha/simple-blog/internal/common"
+	"github.com/pandukamuditha/simple-blog/internal/handlers"
 )
+
+// @title           Basic Wallet
+// @version         1.0
+// @description     This is a basic wallet application
+// @host      		localhost:8008
 
 func main() {
 	logger := common.NewLogger()
@@ -29,13 +34,20 @@ func main() {
 
 	router := mux.NewRouter()
 
+	db := common.Connect(os.Getenv("DB_URL"), logger)
+
 	// health check
 	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("{\"status\": \"ok\"}"))
 	})
 
-	handlers.RegisterPostsHandlers(router, logger)
+	// swagger ui
+	fs := http.FileServer(http.Dir("./docs"))
+	router.PathPrefix("/docs").Handler(http.StripPrefix("/docs", fs))
+
+	// user related routes handling
+	handlers.RegisterUserHandlers(router.PathPrefix("/user").Subrouter(), logger, db)
 
 	readTimeout, err := common.GetEnvInt("READ_TIMEOUT")
 	if err != nil {
