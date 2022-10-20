@@ -14,5 +14,6 @@ func Connect(url string, l *Logger) *pgx.Conn {
 		return nil
 	}
 
+	l.Logf("Connected to database: %s:%d", conn.Config().Host, conn.Config().Port)
 	return conn
 }

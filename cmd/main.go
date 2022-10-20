@@ -49,6 +49,9 @@ func main() {
 	// user related routes handling
 	handlers.RegisterUserHandlers(router.PathPrefix("/user").Subrouter(), logger, db)
 
+	//auth related routes
+	handlers.RegisterAuthHandlers(router.PathPrefix("/auth").Subrouter(), logger, db)
+
 	readTimeout, err := common.GetEnvInt("READ_TIMEOUT")
 	if err != nil {
 		readTimeout = 5

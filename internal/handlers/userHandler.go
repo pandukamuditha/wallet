@@ -1,36 +1,28 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v4"
 	"github.com/pandukamuditha/simple-blog/internal/common"
-	"github.com/pandukamuditha/simple-blog/internal/models"
 	"github.com/pandukamuditha/simple-blog/internal/repositories"
 )
 
 func RegisterUserHandlers(r *mux.Router, l *common.Logger, db *pgx.Conn) {
 	userHandler := UserHandler{
-		logger: l,
-		dao:    &repositories.UserRepository{DB: db},
+		logger:  l,
+		queries: repositories.New(db),
 	}
 
 	r.HandleFunc("/{userId}", userHandler.getUser)
 	r.HandleFunc("", userHandler.createUser).Methods(http.MethodPost)
 }
 
-type UserDAO interface {
-	GetUserById(ctx context.Context, userId int) (*models.User, error)
-	CreateUser(ctx context.Context, args repositories.CreateUserParams) (*models.User, error)
-}
-
 type UserHandler struct {
-	logger *common.Logger
-	dao    UserDAO
+	logger  *common.Logger
+	queries *repositories.Queries
 }
 
 // ShowAccount godoc
@@ -46,14 +38,14 @@ type UserHandler struct {
 func (u *UserHandler) getUser(rw http.ResponseWriter, r *http.Request) {
 	queryParams := mux.Vars(r)
 
-	val, err := strconv.Atoi(queryParams["userId"])
+	val, err := common.StringToInt64(queryParams["userId"])
 
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	user, err := u.dao.GetUserById(r.Context(), val)
+	user, err := u.queries.GetUser(r.Context(), val)
 
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
@@ -70,15 +62,12 @@ func (u *UserHandler) createUser(rw http.ResponseWriter, r *http.Request) {
 	var data repositories.CreateUserParams
 	json.NewDecoder(r.Body).Decode(&data)
 
-	user, err := u.dao.CreateUser(r.Context(), data)
+	user, err := u.queries.CreateUser(r.Context(), data)
 
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	rw.Header().Set("Content-Type", "application/json")
-	rw.WriteHeader(http.StatusOK)
-
-	json.NewEncoder(rw).Encode(user)
+	common.WriteJsonResponse(rw, http.StatusOK, user)
 }
