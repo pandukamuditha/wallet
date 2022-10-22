@@ -6,12 +6,14 @@ import (
 	"strconv"
 )
 
-var envVarErr = errors.New("env: Variable not available for the provided key")
+var errEnvVar = errors.New("env: Variable not available for the provided key")
+
+var JwtSigningSecret = []byte("password")
 
 func GetEnvStr(key string) (string, error) {
 	valString := os.Getenv(key)
 	if valString == "" {
-		return valString, envVarErr
+		return valString, errEnvVar
 	}
 	return valString, nil
 }

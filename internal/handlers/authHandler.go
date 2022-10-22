@@ -14,8 +14,6 @@ import (
 	"github.com/pandukamuditha/simple-blog/internal/repositories"
 )
 
-var jwtSigningSecret []byte
-
 func RegisterAuthHandlers(router *mux.Router, logger *common.Logger, db *pgx.Conn) {
 	authHandler := AuthHandler{
 		logger:  logger,
@@ -79,7 +77,7 @@ func (a *AuthHandler) login(rw http.ResponseWriter, r *http.Request) {
 		Subject:   loginCredentials.Username,
 	})
 
-	tokenString, _ := token.SignedString(jwtSigningSecret)
+	tokenString, _ := token.SignedString(common.JwtSigningSecret)
 
 	type TokenResponse struct {
 		AccessToken string `json:"access_token"`

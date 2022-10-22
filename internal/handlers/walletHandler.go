@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v4"
 	"github.com/pandukamuditha/simple-blog/internal/common"
+	"github.com/pandukamuditha/simple-blog/internal/middleware"
 	"github.com/pandukamuditha/simple-blog/internal/repositories"
 )
 
@@ -23,6 +25,6 @@ type WalletHandler struct {
 	queries *repositories.Queries
 }
 
-func (*WalletHandler) getWalletBalance(rw http.ResponseWriter, r *http.Request) {
-
+func (w *WalletHandler) getWalletBalance(rw http.ResponseWriter, r *http.Request) {
+	fmt.Print(r.Context().Value(middleware.TokenClaimsKey{}))
 }

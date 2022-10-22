@@ -13,6 +13,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/pandukamuditha/simple-blog/internal/common"
 	"github.com/pandukamuditha/simple-blog/internal/handlers"
+	"github.com/pandukamuditha/simple-blog/internal/middleware"
 )
 
 // @title           Basic Wallet
@@ -46,11 +47,17 @@ func main() {
 	fs := http.FileServer(http.Dir("./docs"))
 	router.PathPrefix("/docs").Handler(http.StripPrefix("/docs", fs))
 
-	// user related routes handling
+	// user related routes
 	handlers.RegisterUserHandlers(router.PathPrefix("/user").Subrouter(), logger, db)
 
-	//auth related routes
+	// auth related routes
 	handlers.RegisterAuthHandlers(router.PathPrefix("/auth").Subrouter(), logger, db)
+
+	// wallet related routes
+	handlers.RegisterWalletHandlers(router.PathPrefix("/wallet").Subrouter(), logger, db)
+
+	// token validation only
+	router.Use(middleware.AuthenticationMiddleware)
 
 	readTimeout, err := common.GetEnvInt("READ_TIMEOUT")
 	if err != nil {
