@@ -1,7 +1,8 @@
 package handlers
 
 import (
-	"crypto"
+	"crypto/sha512"
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -13,7 +14,7 @@ import (
 	"github.com/pandukamuditha/simple-blog/internal/repositories"
 )
 
-var hmacSampleSecret []byte
+var jwtSigningSecret []byte
 
 func RegisterAuthHandlers(router *mux.Router, logger *common.Logger, db *pgx.Conn) {
 	authHandler := AuthHandler{
@@ -58,9 +59,9 @@ func (a *AuthHandler) login(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sha512 := crypto.SHA512.New()
-	sha512.Write([]byte(loginCredentials.Password))
-	inputPasswordHash := string(sha512.Sum(nil))
+	sha_512 := sha512.New()
+	sha_512.Write([]byte(loginCredentials.Password))
+	inputPasswordHash := hex.EncodeToString(sha_512.Sum(nil))
 
 	if savedPasswordHash != inputPasswordHash {
 		common.WriteJsonResponse(
@@ -71,12 +72,14 @@ func (a *AuthHandler) login(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"foo": "bar",
-		"nbf": time.Date(2015, 10, 10, 12, 0, 0, 0, time.UTC).Unix(),
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		ExpiresAt: time.Now().Unix() + (15 * 60000),
+		IssuedAt:  time.Now().Unix(),
+		Issuer:    "simple-wallet-server",
+		Subject:   loginCredentials.Username,
 	})
 
-	tokenString, _ := token.SignedString(hmacSampleSecret)
+	tokenString, _ := token.SignedString(jwtSigningSecret)
 
 	type TokenResponse struct {
 		AccessToken string `json:"access_token"`
