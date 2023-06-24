@@ -5,7 +5,7 @@ INSERT INTO "wallet" (user_id) VALUES (?) RETURNING id, user_id;
 INSERT INTO "wallet" (user_id, balance) VALUES (?, ?) RETURNING id, user_id, balance;
 
 -- name: GetWalletById :one
-SELECT id, user_id, balance FROM "wallet" WHERE id = ?;
+SELECT id, user_id, balance FROM "wallet" WHERE id = $1;
 
 -- name: GetWalletByUserId :one
-SELECT id, user_id, balance FROM "wallet" WHERE user_id = ?;
+SELECT id, user_id, balance FROM "wallet" WHERE user_id = $1;

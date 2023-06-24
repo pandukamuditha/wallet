@@ -42,7 +42,7 @@ func (q *Queries) CreateWalletWithBalance(ctx context.Context, arg CreateWalletW
 }
 
 const getWalletById = `-- name: GetWalletById :one
-SELECT id, user_id, balance FROM "wallet" WHERE id = ?
+SELECT id, user_id, balance FROM "wallet" WHERE id = $1
 `
 
 func (q *Queries) GetWalletById(ctx context.Context, id int64) (Wallet, error) {
@@ -53,7 +53,7 @@ func (q *Queries) GetWalletById(ctx context.Context, id int64) (Wallet, error) {
 }
 
 const getWalletByUserId = `-- name: GetWalletByUserId :one
-SELECT id, user_id, balance FROM "wallet" WHERE user_id = ?
+SELECT id, user_id, balance FROM "wallet" WHERE user_id = $1
 `
 
 func (q *Queries) GetWalletByUserId(ctx context.Context, userID int64) (Wallet, error) {

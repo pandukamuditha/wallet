@@ -27,6 +27,7 @@ func main() {
 	err := godotenv.Load()
 	if err != nil {
 		logger.Log("Error loading .env file")
+		os.Exit(-1)
 	} else {
 		logger.Log("Successfully loaded .env file")
 	}
@@ -57,7 +58,7 @@ func main() {
 	handlers.RegisterWalletHandlers(router.PathPrefix("/wallet").Subrouter(), logger, db)
 
 	// token validation only
-	router.Use(middleware.AuthenticationMiddleware)
+	router.Use(middleware.AuthenticationMiddleware(logger, db))
 
 	readTimeout, err := common.GetEnvInt("READ_TIMEOUT")
 	if err != nil {

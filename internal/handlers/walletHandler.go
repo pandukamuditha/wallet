@@ -26,11 +26,12 @@ type WalletHandler struct {
 	queries *repositories.Queries
 }
 
-type WalletBalanceResponse struct {
-	Balance int32 `json:"balance"`
-}
-
 func (w *WalletHandler) getWalletBalance(rw http.ResponseWriter, r *http.Request) {
+	type WalletBalanceResponse struct {
+		WalletId int64 `json:"walletId"`
+		Balance  int32 `json:"balance"`
+	}
+
 	params := mux.Vars(r)
 
 	walletId, err := common.StringToInt64(params["walletId"])
@@ -88,9 +89,29 @@ func (w *WalletHandler) getWalletBalance(rw http.ResponseWriter, r *http.Request
 		return
 	}
 
-	walletBalanceResponse := WalletBalanceResponse{Balance: wallet.Balance}
+	walletBalanceResponse := WalletBalanceResponse{
+		WalletId: wallet.ID,
+		Balance:  wallet.Balance,
+	}
 
 	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(http.StatusOK)
 	json.NewEncoder(rw).Encode(walletBalanceResponse)
+}
+
+func (w *WalletHandler) transferToWallet(rw http.ResponseWriter, r *http.Request) {
+	type TransferToWalletRequest struct {
+		WalletIdFrom int64 `json:"walletIdFrom"`
+		WalletIdTo   int64 `json:"walletIdTo"`
+		Amount       int32 `json:"amount"`
+	}
+
+	var transferToWalletRequest TransferToWalletRequest
+	json.NewDecoder(r.Body).Decode(&transferToWalletRequest)
+
+	if (transferToWalletRequest.Amount <= 0) {
+		return
+	}
+
+	
 }

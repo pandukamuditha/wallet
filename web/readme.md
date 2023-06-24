@@ -1,1 +1,1 @@
-React application for the simple blog
+React application for the digital wallet

@@ -85,7 +85,5 @@ func (a *AuthHandler) login(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	tokenResponse := TokenResponse{AccessToken: tokenString, TokenType: "Bearer"}
-	rw.Header().Set("Content-Type", "application/json")
-	rw.WriteHeader(http.StatusOK)
-	json.NewEncoder(rw).Encode(tokenResponse)
+	SendJSONResponse(rw, http.StatusOK, tokenResponse)
 }
